@@ -1,13 +1,43 @@
-nginx:
+networks:
+  clinic-net:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: clinic_postgres
+    environment:
+      - POSTGRES_USER=clinic_user
+      - POSTGRES_PASSWORD=secure_password_123
+      - POSTGRES_DB=clinic_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - clinic-net
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: clinic_pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@ictu.edu.vn
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    ports:
+      - "5050:80"
+    networks:
+      - clinic-net
+    restart: always
+
+  nginx:
     image: nginx:alpine
     container_name: clinic_nginx
+    restart: always
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
       - clinic-net
-    depends_on:
-      - webapp
-    restart: always
+
+volumes:
+  pgdata:
